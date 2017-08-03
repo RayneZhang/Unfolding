@@ -84,13 +84,18 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Assets\_Scripts\CameraMovement.cs" />
-    <Compile Include="Assets\_Scripts\Container.cs" />
-    <Compile Include="Assets\_Scripts\Glow.cs" />
     <Compile Include="Assets\_Scripts\MeshGenerator.cs" />
-    <Compile Include="Assets\_Scripts\MyConstants.cs" />
     <Compile Include="Assets\_Scripts\PlayerControl.cs" />
-    <Compile Include="Assets\_Scripts\SaveRenderTexture.cs" />
+    <Compile Include="Assets\_Scripts\Static\Container.cs" />
+    <Compile Include="Assets\_Scripts\Static\Glow.cs" />
+    <Compile Include="Assets\_Scripts\Static\MyConstants.cs" />
+    <Compile Include="Assets\_Scripts\UI\CameraMovement.cs" />
+    <Compile Include="Assets\_Scripts\UI\Intro2Level1.cs" />
+    <Compile Include="Assets\_Scripts\UI\SaveRenderTexture.cs" />
+    <Compile Include="Assets\_Scripts\UI\UITextTypeWriter.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Assets\_Results\result_1.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="GenerateTargetFrameworkMonikerAttribute" />

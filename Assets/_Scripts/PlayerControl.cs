@@ -2,10 +2,17 @@
 using System.Collections.Generic;
 using UnityEngine;
 using Container;
+using System.IO;
+using System;
 
 public class PlayerControl : MonoBehaviour {
 
     public MeshGenerator meshGenerator;
+    public GameObject WinCanvas;
+    public GameObject LoseCanvas;
+    public GameObject UserCanvas;
+
+    private string path = "Assets/_Results/result_1.txt";
 
     [HideInInspector]
     public bool unfolding = false;
@@ -159,5 +166,81 @@ public class PlayerControl : MonoBehaviour {
         //But this can be done by deleting the line after the previous unfolding finished.
         DeleteAndCheckLinesInFace(faceIndices[0], midPoint);
         DeleteAndCheckLinesInFace(faceIndices[1], midPoint);
+    }
+
+    public void Grading()
+    {
+        bool result = CheckResult();
+        Debug.Log(result);
+        UserCanvas.SetActive(false);
+
+        if (result)
+            WinCanvas.SetActive(true);
+        else
+            LoseCanvas.SetActive(true);
+    }
+
+    private bool CheckResult()
+    {
+        StreamReader reader = new StreamReader(path, false);
+        char[] delimiterChars = { ';' };
+
+        int NumofFaces = meshGenerator.NumofFaces;
+        for(int i = 0; i < NumofFaces; i++)
+        {
+            //Read header.
+            reader.ReadLine();
+            string currentLine = reader.ReadLine();
+
+            string[] results = currentLine.Split(delimiterChars, StringSplitOptions.RemoveEmptyEntries);
+            if (meshGenerator.model.faces[i].ConnectedFaces.ToArray().Length != results.Length)
+                return false;
+            foreach(string result in results)
+            {
+                if (!meshGenerator.model.faces[i].ConnectedFaces.Contains(int.Parse(result)))
+                    return false;
+            }
+            
+        }
+        reader.Close();
+        return true;
+    }
+
+    public void ShowResult()
+    {
+        int NumofFaces = meshGenerator.NumofFaces;
+        for(int i = 0; i < NumofFaces; i++)
+        {
+            //List<int> ConnectedFaces = meshGenerator.model.faces[i].ConnectedFaces;
+            Debug.Log("Face " + i + " contains:");
+            string CurrentConnectedFaces = "";
+            foreach(int j in meshGenerator.model.faces[i].ConnectedFaces)
+            {
+                CurrentConnectedFaces += j.ToString();
+                CurrentConnectedFaces += ";";
+            }
+            Debug.Log(CurrentConnectedFaces);
+        }
+    }
+
+    public void SaveResult()
+    {
+        StreamWriter writer = new StreamWriter(path, false);
+
+        int NumofFaces = meshGenerator.NumofFaces;
+        for (int i = 0; i < NumofFaces; i++)
+        {
+            writer.WriteLine("Face " + i + " contains:");
+            string CurrentConnectedFaces = "";
+            foreach (int j in meshGenerator.model.faces[i].ConnectedFaces)
+            {
+                CurrentConnectedFaces += j.ToString();
+                CurrentConnectedFaces += ";";
+            }
+
+            writer.WriteLine(CurrentConnectedFaces);
+        }
+
+        writer.Close();
     }
 }

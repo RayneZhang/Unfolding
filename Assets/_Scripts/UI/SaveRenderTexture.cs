@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class SaveRenderTexture : MonoBehaviour {
 
-    private new string name = "texture.png";
+    private new string name = "Assets/_Results/texture.png";
     public RenderTexture oldRenderTexture;
 
 	public void SaveRT()
