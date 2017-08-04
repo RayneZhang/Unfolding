@@ -22,6 +22,7 @@ namespace Container
         public int offset = 0;
 
         public List<int> ConnectedFaces;
+        public List<int> Neighbors;
     }
 
     public class Line

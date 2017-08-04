@@ -40,7 +40,7 @@ public class MeshGenerator : MonoBehaviour {
 
     public PlayerControl player;
 
-    public float smoothTime = 6.0f;
+    public float smoothTime = 5.0f;
     private float smoothPassedTime = 0f;
 
     private List<int> UnfoldingFaces;
@@ -216,6 +216,7 @@ public class MeshGenerator : MonoBehaviour {
         newFace.lineStartingPoint = new List<Vector3>();
         newFace.lineEndingPoint = new List<Vector3>();
         newFace.ConnectedFaces = new List<int>();
+        newFace.Neighbors = new List<int>();
         return newFace;
     }
 

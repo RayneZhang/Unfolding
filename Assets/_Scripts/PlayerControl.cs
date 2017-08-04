@@ -19,18 +19,26 @@ public class PlayerControl : MonoBehaviour {
     bool unfoldA = false;
     bool unfoldB = false;
 
-    //List<Vector3> TargetPositions;
+    List<Vector3> WaitingLines;
 
     // Use this for initialization
     void Start () {
         //TargetPositions = new List<Vector3>();
         WinCanvas.SetActive(false);
         LoseCanvas.SetActive(false);
-        UserCanvas.SetActive(true);
+        
+        WaitingLines = new List<Vector3>();
     }
 	
 	// Update is called once per frame
 	void Update () {
+        if (!unfolding && WaitingLines.ToArray().Length != 0)
+        {
+            Vector3 midPoint = WaitingLines[0];
+            WaitingLines.RemoveAt(0);
+            ClickAtLine(midPoint);
+        }
+
         if (!unfolding && Input.GetMouseButtonDown(0)) {
             RaycastHit hitObject = new RaycastHit();
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
@@ -43,80 +51,99 @@ public class PlayerControl : MonoBehaviour {
                 hitObject.transform.GetComponent<Glow>().destroyLine();
 
                 Vector3 midPoint = (startingPoint + endingPoint) / 2;
-                Debug.Log(midPoint);
-                //Get two faces' indices of the selected line.
-                List<int> faceIndices = meshGenerator.GetFaceIndicesOfLine(midPoint);
+                //Debug.Log(midPoint);
 
-                int indexA = faceIndices[0];
-                int indexB = faceIndices[1];
-
-                //Delete the lines in the two faces. Then check if one of these faces has only one line left, if so, it needs to unfold.
-                unfoldA = DeleteAndCheckLinesInFace(indexA, midPoint);
-                unfoldB = DeleteAndCheckLinesInFace(indexB, midPoint);
-                unfolding = unfoldA || unfoldB;
-
-                int TargetIndexofA = -1;
-                int TargetIndexofB = -1;
-                Vector3 currentNormalofA = new Vector3();
-                Vector3 currentNormalofB = new Vector3();
-                Vector3 TargetNormalofA = new Vector3();
-                Vector3 TargetNormalofB = new Vector3();
-
-                if (unfoldA)
-                {
-                    
-                    Vector3 rmStartingPoint = meshGenerator.model.faces[indexA].lineStartingPoint[0];
-                    Vector3 rmEndingPoint = meshGenerator.model.faces[indexA].lineEndingPoint[0];
-                    Vector3 rmMidPoint = meshGenerator.model.faces[indexA].linesMidpoints[0];
-
-                    DeleteLastLine(rmMidPoint);
-
-                    TargetIndexofA = meshGenerator.GetTheOtherFaceIndex(rmMidPoint, indexA);
-                    currentNormalofA = meshGenerator.GetNormalofFace(indexA);
-                    TargetNormalofA = meshGenerator.GetNormalofFace(TargetIndexofA);
-
-                    int NumOfConnectedFaces = meshGenerator.model.faces[indexA].ConnectedFaces.ToArray().Length;
-                    for(int i = -1; i < NumOfConnectedFaces; i++)
-                    {
-                        int currentIndex;
-                        if (i == -1)
-                            currentIndex = indexA;
-                        else
-                            currentIndex = meshGenerator.model.faces[indexA].ConnectedFaces[i];
-
-                        meshGenerator.model.faces[TargetIndexofA].ConnectedFaces.Add(currentIndex);
-                    }
-
-                    StartUnfolding(indexA, currentNormalofA, TargetNormalofA, rmStartingPoint, rmEndingPoint);
-                }
-                if (unfoldB)
-                {
-                    
-                    Vector3 rmStartingPoint = meshGenerator.model.faces[indexB].lineStartingPoint[0];
-                    Vector3 rmEndingPoint = meshGenerator.model.faces[indexB].lineEndingPoint[0];
-                    Vector3 rmMidPoint = meshGenerator.model.faces[indexB].linesMidpoints[0];
-
-                    DeleteLastLine(rmMidPoint);
-
-                    TargetIndexofB = meshGenerator.GetTheOtherFaceIndex(rmMidPoint, indexB);
-                    currentNormalofB = meshGenerator.GetNormalofFace(indexB);
-                    TargetNormalofB = meshGenerator.GetNormalofFace(TargetIndexofB);
-
-                    int NumOfConnectedFaces = meshGenerator.model.faces[indexB].ConnectedFaces.ToArray().Length;
-                    for (int i = -1; i < NumOfConnectedFaces; i++)
-                    {
-                        int currentIndex;
-                        if (i == -1)
-                            currentIndex = indexB;
-                        else
-                            currentIndex = meshGenerator.model.faces[indexB].ConnectedFaces[i];
-
-                        meshGenerator.model.faces[TargetIndexofB].ConnectedFaces.Add(currentIndex);
-                    }
-
-                    StartUnfolding(indexB, currentNormalofB, TargetNormalofB, rmStartingPoint, rmEndingPoint);
-                }
+                ClickAtLine(midPoint);
             }
+        }
+    }
+
+    private void ClickAtLine(Vector3 midPoint)
+    {
+        //Get two faces' indices of the selected line.
+        List<int> faceIndices = meshGenerator.GetFaceIndicesOfLine(midPoint);
+
+        int indexA = faceIndices[0];
+        int indexB = faceIndices[1];
+
+        //Delete the lines in the two faces. Then check if one of these faces has only one line left, if so, it needs to unfold.
+        unfoldA = DeleteAndCheckLinesInFace(indexA, midPoint);
+        unfoldB = DeleteAndCheckLinesInFace(indexB, midPoint);
+        unfolding = unfoldA || unfoldB;
+        Debug.Log(unfolding);
+
+        if (unfoldA)
+        {
+            Vector3 rmStartingPoint = meshGenerator.model.faces[indexA].lineStartingPoint[0];
+            Vector3 rmEndingPoint = meshGenerator.model.faces[indexA].lineEndingPoint[0];
+            Vector3 rmMidPoint = meshGenerator.model.faces[indexA].linesMidpoints[0];
+
+            DeleteLastLine(rmMidPoint);
+            if (GameObject.FindGameObjectWithTag("Line") == null)
+            {
+                WaitingLines.Clear();
+                return;
+            }
+
+            int TargetIndexofA = meshGenerator.GetTheOtherFaceIndex(rmMidPoint, indexA);
+            Vector3 currentNormalofA = meshGenerator.GetNormalofFace(indexA);
+            Vector3 TargetNormalofA = meshGenerator.GetNormalofFace(TargetIndexofA);
+
+            int NumOfConnectedFaces = meshGenerator.model.faces[indexA].ConnectedFaces.ToArray().Length;
+            for (int i = -1; i < NumOfConnectedFaces; i++)
+            {
+                int currentIndex;
+                if (i == -1)
+                {
+                    currentIndex = indexA;
+                    meshGenerator.model.faces[TargetIndexofA].Neighbors.Add(currentIndex);
+                    meshGenerator.model.faces[currentIndex].Neighbors.Add(TargetIndexofA);
+                }
+                else
+                    currentIndex = meshGenerator.model.faces[indexA].ConnectedFaces[i];
+
+                meshGenerator.model.faces[TargetIndexofA].ConnectedFaces.Add(currentIndex);
+            }
+
+
+
+            StartUnfolding(indexA, currentNormalofA, TargetNormalofA, rmStartingPoint, rmEndingPoint);
+        }
+        if (unfoldB)
+        {
+
+            Vector3 rmStartingPoint = meshGenerator.model.faces[indexB].lineStartingPoint[0];
+            Vector3 rmEndingPoint = meshGenerator.model.faces[indexB].lineEndingPoint[0];
+            Vector3 rmMidPoint = meshGenerator.model.faces[indexB].linesMidpoints[0];
+
+            DeleteLastLine(rmMidPoint);
+            if (GameObject.FindGameObjectWithTag("Line") == null)
+            {
+                WaitingLines.Clear();
+                return;
+            }
+
+            int TargetIndexofB = meshGenerator.GetTheOtherFaceIndex(rmMidPoint, indexB);
+            Vector3 currentNormalofB = meshGenerator.GetNormalofFace(indexB);
+            Vector3 TargetNormalofB = meshGenerator.GetNormalofFace(TargetIndexofB);
+
+            int NumOfConnectedFaces = meshGenerator.model.faces[indexB].ConnectedFaces.ToArray().Length;
+            for (int i = -1; i < NumOfConnectedFaces; i++)
+            {
+                int currentIndex;
+                if (i == -1)
+                {
+                    currentIndex = indexB;
+                    meshGenerator.model.faces[TargetIndexofB].Neighbors.Add(currentIndex);
+                    meshGenerator.model.faces[currentIndex].Neighbors.Add(TargetIndexofB);
+                }
+                else
+                    currentIndex = meshGenerator.model.faces[indexB].ConnectedFaces[i];
+
+                meshGenerator.model.faces[TargetIndexofB].ConnectedFaces.Add(currentIndex);
+            }
+
+            StartUnfolding(indexB, currentNormalofB, TargetNormalofB, rmStartingPoint, rmEndingPoint);
         }
     }
 
@@ -142,12 +169,17 @@ public class PlayerControl : MonoBehaviour {
     private bool DeleteAndCheckLinesInFace(int faceIndex, Vector3 midPoint)
     {
         Face face = meshGenerator.model.faces[faceIndex];
+
+        if (face.linesMidpoints.ToArray().Length <= 0)
+            return false;
+
         int index = face.linesMidpoints.IndexOf(midPoint);
+
         face.linesMidpoints.Remove(midPoint);
         face.lineStartingPoint.RemoveAt(index);
         face.lineEndingPoint.RemoveAt(index);
         Debug.Log(face.linesMidpoints.ToArray().Length);
-        if (face.linesMidpoints.ToArray().Length > 1)
+        if (face.linesMidpoints.ToArray().Length != 1)
             return false;
         else
             return true;   
@@ -163,11 +195,11 @@ public class PlayerControl : MonoBehaviour {
                 Destroy(line);
         }
 
-        List<int> faceIndices = meshGenerator.GetFaceIndicesOfLine(midPoint);
-        //TODO: You need to consider a series of unfolding, which means when you delete the last line, a new unfolding happens.
+        //You need to consider a series of unfolding, which means when you delete the last line, a new unfolding happens.
         //But this can be done by deleting the line after the previous unfolding finished.
-        DeleteAndCheckLinesInFace(faceIndices[0], midPoint);
-        DeleteAndCheckLinesInFace(faceIndices[1], midPoint);
+
+        //Solution:Push the midPoint to an List, waiting to be processed.
+        WaitingLines.Add(midPoint);
     }
 
     public void Grading()
@@ -195,11 +227,11 @@ public class PlayerControl : MonoBehaviour {
             string currentLine = reader.ReadLine();
 
             string[] results = currentLine.Split(delimiterChars, StringSplitOptions.RemoveEmptyEntries);
-            if (meshGenerator.model.faces[i].ConnectedFaces.ToArray().Length != results.Length)
+            if (meshGenerator.model.faces[i].Neighbors.ToArray().Length != results.Length)
                 return false;
             foreach(string result in results)
             {
-                if (!meshGenerator.model.faces[i].ConnectedFaces.Contains(int.Parse(result)))
+                if (!meshGenerator.model.faces[i].Neighbors.Contains(int.Parse(result)))
                     return false;
             }
             
@@ -213,15 +245,15 @@ public class PlayerControl : MonoBehaviour {
         int NumofFaces = meshGenerator.NumofFaces;
         for(int i = 0; i < NumofFaces; i++)
         {
-            //List<int> ConnectedFaces = meshGenerator.model.faces[i].ConnectedFaces;
+            
             Debug.Log("Face " + i + " contains:");
-            string CurrentConnectedFaces = "";
-            foreach(int j in meshGenerator.model.faces[i].ConnectedFaces)
+            string CurrentNeighbor = "";
+            foreach(int j in meshGenerator.model.faces[i].Neighbors)
             {
-                CurrentConnectedFaces += j.ToString();
-                CurrentConnectedFaces += ";";
+                CurrentNeighbor += j.ToString();
+                CurrentNeighbor += ";";
             }
-            Debug.Log(CurrentConnectedFaces);
+            Debug.Log(CurrentNeighbor);
         }
     }
 
@@ -233,14 +265,14 @@ public class PlayerControl : MonoBehaviour {
         for (int i = 0; i < NumofFaces; i++)
         {
             writer.WriteLine("Face " + i + " contains:");
-            string CurrentConnectedFaces = "";
-            foreach (int j in meshGenerator.model.faces[i].ConnectedFaces)
+            string CurrentNeighbor = "";
+            foreach (int j in meshGenerator.model.faces[i].Neighbors)
             {
-                CurrentConnectedFaces += j.ToString();
-                CurrentConnectedFaces += ";";
+                CurrentNeighbor += j.ToString();
+                CurrentNeighbor += ";";
             }
 
-            writer.WriteLine(CurrentConnectedFaces);
+            writer.WriteLine(CurrentNeighbor);
         }
 
         writer.Close();

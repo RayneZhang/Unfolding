@@ -6,16 +6,10 @@ public class CameraMovement : MonoBehaviour {
 	private float speed = 5.0f;
 	private float zoomSpeed = 2.0f;
 
-    public float smoothing = 100.0f;
+    public float smoothing = 200.0f;
 
-	public float minX = -100.0f;
-	public float maxX = 100.0f;
-	
-	public float minY = -100.0f;
-	public float maxY = 100.0f;
-
-	public float sensX = 80;
-	public float sensY = 80;
+	public float sensX = 100;
+	public float sensY = 100;
 	
 	float rotationY = 0.0f;
 	float rotationX = 0.0f;
@@ -47,11 +41,14 @@ public class CameraMovement : MonoBehaviour {
 		}
 
 		if (Input.GetMouseButton (1)) {
-            rotationX += Input.GetAxis ("Mouse X") * sensX * Time.deltaTime;
-			rotationY += Input.GetAxis ("Mouse Y") * sensY * Time.deltaTime;
-			rotationY = Mathf.Clamp(rotationY, minY, maxY);
-            rotationX = Mathf.Clamp(rotationX, minX, maxX);
-			transform.localEulerAngles = new Vector3 (-rotationY, rotationX, 0);
+            rotationX = Mathf.Lerp(rotationX, rotationX + Input.GetAxis ("Mouse X") * sensX * Time.deltaTime, smoothing * Time.deltaTime);
+            rotationY = Mathf.Lerp(rotationY, rotationY + Input.GetAxis ("Mouse Y") * sensY * Time.deltaTime, smoothing * Time.deltaTime);
+            
+            
+
+            //rotationY = Mathf.Clamp(rotationY, minY, maxY);
+            //rotationX = Mathf.Clamp(rotationX, minX, maxX);
+            transform.localEulerAngles = new Vector3 (-rotationY, rotationX, 0);
 		}
 	}
 }
