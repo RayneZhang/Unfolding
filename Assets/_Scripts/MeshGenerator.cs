@@ -58,10 +58,7 @@ public class MeshGenerator : MonoBehaviour {
         mesh = new Mesh();
         mf.mesh = mesh;
 
-        vertices = new List<Vector3>();
-        triangles = new List<int>();
-        normals = new List<Vector3>();
-        uvs = new List<Vector2>();
+        InitArrays();
 
         CreateModel();
 
@@ -70,7 +67,15 @@ public class MeshGenerator : MonoBehaviour {
         mesh.normals = normals.ToArray();
         mesh.triangles = triangles.ToArray();
 
-        CreateLines();
+        CreateLines();    
+    }
+
+    private void InitArrays()
+    {
+        vertices = new List<Vector3>();
+        triangles = new List<int>();
+        normals = new List<Vector3>();
+        uvs = new List<Vector2>();
 
         UnfoldingFaces = new List<int>();
         StartingVertices = new List<Vector3>();
@@ -442,4 +447,17 @@ public class MeshGenerator : MonoBehaviour {
         return PivotPoint;
     }
 
+    public void ReGenerate()
+    {
+        InitArrays();
+
+        CreateModel();
+
+        //Assign Arrays
+        mesh.vertices = vertices.ToArray();
+        mesh.normals = normals.ToArray();
+        mesh.triangles = triangles.ToArray();
+
+        CreateLines();
+    }
 }

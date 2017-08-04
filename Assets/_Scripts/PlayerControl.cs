@@ -24,7 +24,9 @@ public class PlayerControl : MonoBehaviour {
     // Use this for initialization
     void Start () {
         //TargetPositions = new List<Vector3>();
-        
+        WinCanvas.SetActive(false);
+        LoseCanvas.SetActive(false);
+        UserCanvas.SetActive(true);
     }
 	
 	// Update is called once per frame
@@ -243,4 +245,23 @@ public class PlayerControl : MonoBehaviour {
 
         writer.Close();
     }
+
+    private void DeleteAllLines()
+    {
+        foreach (GameObject line in GameObject.FindGameObjectsWithTag("Line"))
+        {
+            Destroy(line);
+        }
+    }
+
+    public void Replay()
+    {
+        DeleteAllLines();
+        meshGenerator.ReGenerate();
+
+        WinCanvas.SetActive(false);
+        LoseCanvas.SetActive(false);
+        UserCanvas.SetActive(true);
+    }
+    
 }

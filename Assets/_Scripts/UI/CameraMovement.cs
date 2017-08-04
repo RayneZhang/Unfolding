@@ -8,8 +8,8 @@ public class CameraMovement : MonoBehaviour {
 
     public float smoothing = 100.0f;
 
-	/*public float minX = -1000.0f;
-	public float maxX = 1000.0f;*/
+	public float minX = -100.0f;
+	public float maxX = 100.0f;
 	
 	public float minY = -100.0f;
 	public float maxY = 100.0f;
@@ -49,7 +49,8 @@ public class CameraMovement : MonoBehaviour {
 		if (Input.GetMouseButton (1)) {
             rotationX += Input.GetAxis ("Mouse X") * sensX * Time.deltaTime;
 			rotationY += Input.GetAxis ("Mouse Y") * sensY * Time.deltaTime;
-			rotationY = Mathf.Clamp (rotationY, minY, maxY);
+			rotationY = Mathf.Clamp(rotationY, minY, maxY);
+            rotationX = Mathf.Clamp(rotationX, minX, maxX);
 			transform.localEulerAngles = new Vector3 (-rotationY, rotationX, 0);
 		}
 	}
