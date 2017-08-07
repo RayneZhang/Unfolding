@@ -48,6 +48,7 @@ public class MeshGenerator : MonoBehaviour {
     private List<Vector3> UnfoldingVertices;
     private List<Vector3> StartingNormals;
     private List<Vector3> UnfoldingNormals;
+    private List<Vector3> PivotPoints;
 
     [HideInInspector]
     public int NumofFaces = 0;
@@ -82,6 +83,7 @@ public class MeshGenerator : MonoBehaviour {
         UnfoldingVertices = new List<Vector3>();
         StartingNormals = new List<Vector3>();
         UnfoldingNormals = new List<Vector3>();
+        PivotPoints = new List<Vector3>();
     }
 
     void Update()
@@ -100,6 +102,7 @@ public class MeshGenerator : MonoBehaviour {
                 UnfoldingVertices.Clear();
                 StartingNormals.Clear();
                 UnfoldingNormals.Clear();
+                PivotPoints.Clear();
             }
             else
             {
@@ -113,10 +116,17 @@ public class MeshGenerator : MonoBehaviour {
                     int ReverseOffset = model.faces[FaceIndex + NumofFaces].offset;
 
                     Vector3 tmpNorm = Vector3.Lerp(StartingNormals[i], UnfoldingNormals[i], Mathf.SmoothStep(0, 1, smoothPassedTime / smoothTime));
+                    Vector3 pos1 = Vector3.Lerp(StartingVertices[0 + ptr], UnfoldingVertices[0 + ptr], Mathf.SmoothStep(0, 1, smoothPassedTime / smoothTime));
+                    Vector3 pos2 = Vector3.Lerp(StartingVertices[1 + ptr], UnfoldingVertices[1 + ptr], Mathf.SmoothStep(0, 1, smoothPassedTime / smoothTime)); 
+                    Vector3 pos3 = Vector3.Lerp(StartingVertices[2 + ptr], UnfoldingVertices[2 + ptr], Mathf.SmoothStep(0, 1, smoothPassedTime / smoothTime));
+
+                    tmpNorm = Vector3.Cross((pos1 - pos2), (pos1 - pos3));
+                    tmpNorm = (Vector3.Angle(tmpNorm, UnfoldingNormals[i]) > 90f) ? -tmpNorm : tmpNorm;
 
                     for (int j = 0; j < VertexSize; j++)
                     {
-                        Vector3 tmpPos = Vector3.Lerp(StartingVertices[j + ptr], UnfoldingVertices[j + ptr], Mathf.SmoothStep(0, 1, smoothPassedTime / smoothTime));
+                        //Vector3 tmpPos = Vector3.Lerp(StartingVertices[j + ptr], UnfoldingVertices[j + ptr], Mathf.SmoothStep(0, 1, smoothPassedTime / smoothTime));
+                        Vector3 tmpPos = PivotPoints[j + ptr] + Vector3.Slerp(StartingVertices[j + ptr] - PivotPoints[j + ptr], UnfoldingVertices[j + ptr] - PivotPoints[j + ptr], Mathf.SmoothStep(0, 1, smoothPassedTime / smoothTime));
                         vertices[j + Offset] = tmpPos;
                         vertices[j + ReverseOffset] = tmpPos;
 
@@ -428,6 +438,7 @@ public class MeshGenerator : MonoBehaviour {
                 UnfoldingVertices.Add(newPosition);
 
                 StartingVertices.Add(currentVertex);
+                PivotPoints.Add(PivotPoint);
             }
             UnfoldingFaces.Add(currentIndex);
             StartingNormals.Add(_StartNormal);
