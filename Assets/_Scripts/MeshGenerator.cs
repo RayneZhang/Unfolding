@@ -2,12 +2,14 @@
 using System.Collections.Generic;
 using UnityEngine;
 using Container;
-using MyConstants;
 
 public class MeshGenerator : MonoBehaviour {
 
     MeshFilter mf;
     Mesh mesh;
+
+    Data data;
+    string JsonFilePath = "Assets/_Scripts/Json/model.json";
 
     public Model model;
 
@@ -61,6 +63,8 @@ public class MeshGenerator : MonoBehaviour {
 
         InitArrays();
 
+        InitConstants();
+
         CreateModel();
 
         //Assign Arrays
@@ -69,6 +73,11 @@ public class MeshGenerator : MonoBehaviour {
         mesh.triangles = triangles.ToArray();
 
         CreateLines();    
+    }
+
+    private void InitConstants()
+    {
+        data = new Data(JsonFilePath);
     }
 
     private void InitArrays()
@@ -149,12 +158,12 @@ public class MeshGenerator : MonoBehaviour {
         model = new Model();
         model.faces = new List<Face>();
 
-        if(MyConstants.Data.Faces.Length == 0)
+        if(data.Faces.Length == 0)
         {
             Debug.LogError("Information of the model is missing!");
         }
         else {
-            NumofFaces = MyConstants.Data.Faces[0];
+            NumofFaces = data.Faces[0];
             int ptr = 1;
             int offset = 0;
             for(int i = 0; i < NumofFaces * 2; i++)
@@ -164,19 +173,19 @@ public class MeshGenerator : MonoBehaviour {
 
                 Face newFace = FaceInit();
 
-                int NumofVertices = MyConstants.Data.Faces[ptr++];
-                int NumofTriangles = MyConstants.Data.Faces[ptr++];
+                int NumofVertices = data.Faces[ptr++];
+                int NumofTriangles = data.Faces[ptr++];
                 Vector3 normal = new Vector3();
                 if (i < NumofFaces)
-                    normal = GetNormalByNum(MyConstants.Data.Faces[ptr++]);
+                    normal = GetNormalByNum(data.Faces[ptr++]);
                 else
-                    normal = GetReverseNormalByNum(MyConstants.Data.Faces[ptr++]);
+                    normal = GetReverseNormalByNum(data.Faces[ptr++]);
 
                 for (int j = 0; j < NumofVertices; j++)
                 {
-                    Vector3 vertex = new Vector3(MyConstants.Data.Faces[ptr++],
-                                                            MyConstants.Data.Faces[ptr++],
-                                                            MyConstants.Data.Faces[ptr++]);
+                    Vector3 vertex = new Vector3(data.Faces[ptr++],
+                                                            data.Faces[ptr++],
+                                                            data.Faces[ptr++]);
                     newFace.vertices.Add(vertex);
                     vertices.Add(vertex);
 
@@ -185,9 +194,9 @@ public class MeshGenerator : MonoBehaviour {
                 }
                 for(int k = 0; k < NumofTriangles; k++)
                 {
-                    int triangleNode1 = MyConstants.Data.Faces[ptr++] + offset;
-                    int triangleNode2 = MyConstants.Data.Faces[ptr++] + offset;
-                    int triangleNode3 = MyConstants.Data.Faces[ptr++] + offset;
+                    int triangleNode1 = data.Faces[ptr++] + offset;
+                    int triangleNode2 = data.Faces[ptr++] + offset;
+                    int triangleNode3 = data.Faces[ptr++] + offset;
 
                     if (i < NumofFaces)
                     {
@@ -278,18 +287,18 @@ public class MeshGenerator : MonoBehaviour {
     /// </summary>
     private void CreateLines() {
         AllLines = new List<Line>();
-        int size = MyConstants.Data.Lines.Length;
+        int size = data.Lines.Length;
         for(int i = 0;i < size; i += 8)
         {
             //Debug.Log(Container.Model.nodes[i]);
             //Debug.Log(Container.Model.nodes[i + 1]);
 
-            Vector3 startingPoint = new Vector3(MyConstants.Data.Lines[i + 2], MyConstants.Data.Lines[i + 3], MyConstants.Data.Lines[i + 4]);
-            Vector3 endingPoint = new Vector3(MyConstants.Data.Lines[i + 5], MyConstants.Data.Lines[i + 6], MyConstants.Data.Lines[i + 7]);
+            Vector3 startingPoint = new Vector3(data.Lines[i + 2], data.Lines[i + 3], data.Lines[i + 4]);
+            Vector3 endingPoint = new Vector3(data.Lines[i + 5], data.Lines[i + 6], data.Lines[i + 7]);
             Line newLine = LineInit(startingPoint, endingPoint);
 
-            int faceA = MyConstants.Data.Lines[i];
-            int faceB = MyConstants.Data.Lines[i + 1];
+            int faceA = data.Lines[i];
+            int faceB = data.Lines[i + 1];
             newLine.SetFaceIndices(faceA, faceB);
             AllLines.Add(newLine);
 

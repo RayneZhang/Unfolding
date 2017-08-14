@@ -84,11 +84,13 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Assets\_Scripts\LogTool.cs" />
     <Compile Include="Assets\_Scripts\MeshGenerator.cs" />
+    <Compile Include="Assets\_Scripts\MiniJSON.cs" />
     <Compile Include="Assets\_Scripts\PlayerControl.cs" />
     <Compile Include="Assets\_Scripts\Static\Container.cs" />
+    <Compile Include="Assets\_Scripts\Static\Data.cs" />
     <Compile Include="Assets\_Scripts\Static\Glow.cs" />
-    <Compile Include="Assets\_Scripts\Static\MyConstants.cs" />
     <Compile Include="Assets\_Scripts\UI\CameraMovement.cs" />
     <Compile Include="Assets\_Scripts\UI\Intro2Level1.cs" />
     <Compile Include="Assets\_Scripts\UI\SaveRenderTexture.cs" />

@@ -245,7 +245,6 @@ public class PlayerControl : MonoBehaviour {
         int NumofFaces = meshGenerator.NumofFaces;
         for(int i = 0; i < NumofFaces; i++)
         {
-            
             Debug.Log("Face " + i + " contains:");
             string CurrentNeighbor = "";
             foreach(int j in meshGenerator.model.faces[i].Neighbors)
