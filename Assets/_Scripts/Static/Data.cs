@@ -16,16 +16,18 @@ public class Data {
     private void ImportData(string _path)
     {
         string jsonString = File.ReadAllText(_path);
-        ParseJsonString(jsonString);
+        ParseJsonString(jsonString, "Level0");
     }
 
-    private void ParseJsonString(string data)
+    private void ParseJsonString(string data, string level)
     {
         Dictionary<string, object> dict;
         dict = Json.Deserialize(data) as Dictionary<string, object>;
 
-        List<object> LineObjList = dict["Lines"] as List<object>;
-        List<object> FaceObjList = dict["Faces"] as List<object>;
+        Dictionary<string, object> CurrentLevle = dict[level] as Dictionary<string, object>;
+
+        List<object> LineObjList = CurrentLevle["Lines"] as List<object>;
+        List<object> FaceObjList = CurrentLevle["Faces"] as List<object>;
 
         List<int> LineList = new List<int>();
         List<int> FaceList = new List<int>();
