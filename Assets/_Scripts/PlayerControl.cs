@@ -277,18 +277,9 @@ public class PlayerControl : MonoBehaviour {
         writer.Close();
     }
 
-    private void DeleteAllLines()
-    {
-        foreach (GameObject line in GameObject.FindGameObjectsWithTag("Line"))
-        {
-            Destroy(line);
-        }
-    }
-
     public void Replay()
     {
-        DeleteAllLines();
-        meshGenerator.ReGenerate();
+        meshGenerator.ReGenerate(meshGenerator.CurrentLevel);
 
         WinCanvas.SetActive(false);
         LoseCanvas.SetActive(false);

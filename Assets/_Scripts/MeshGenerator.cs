@@ -10,6 +10,7 @@ public class MeshGenerator : MonoBehaviour {
 
     Data data;
     string JsonFilePath = "Assets/_Scripts/Json/model.json";
+    public int CurrentLevel {get; private set;}
 
     public Model model;
 
@@ -63,7 +64,8 @@ public class MeshGenerator : MonoBehaviour {
 
         InitArrays();
 
-        InitConstants();
+        CurrentLevel = 0;
+        InitConstants(CurrentLevel);
 
         CreateModel();
 
@@ -75,9 +77,9 @@ public class MeshGenerator : MonoBehaviour {
         CreateLines();    
     }
 
-    private void InitConstants()
+    private void InitConstants(int _level)
     {
-        data = new Data(JsonFilePath);
+        data = new Data(JsonFilePath, _level);
     }
 
     private void InitArrays()
@@ -468,9 +470,18 @@ public class MeshGenerator : MonoBehaviour {
         return PivotPoint;
     }
 
-    public void ReGenerate()
+    public void ReGenerate(int _level)
     {
+        // Before regenerate model, we need to delete all lines.
+        foreach (GameObject line in GameObject.FindGameObjectsWithTag("Line"))
+        {
+            Destroy(line);
+        }
+
         InitArrays();
+
+        CurrentLevel = _level;
+        InitConstants(_level);
 
         CreateModel();
 

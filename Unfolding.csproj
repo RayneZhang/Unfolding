@@ -91,12 +91,14 @@
     <Compile Include="Assets\_Scripts\Static\Container.cs" />
     <Compile Include="Assets\_Scripts\Static\Data.cs" />
     <Compile Include="Assets\_Scripts\Static\Glow.cs" />
+    <Compile Include="Assets\_Scripts\Tutorial\ShowText.cs" />
+    <Compile Include="Assets\_Scripts\Tutorial\TutorialBarControl.cs" />
+    <Compile Include="Assets\_Scripts\Tutorial\WelcomeText.cs" />
     <Compile Include="Assets\_Scripts\UI\CameraMovement.cs" />
-    <Compile Include="Assets\_Scripts\UI\Intro2Level1.cs" />
     <Compile Include="Assets\_Scripts\UI\SaveRenderTexture.cs" />
-    <Compile Include="Assets\_Scripts\UI\UITextTypeWriter.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Assets\Fonts\LuckiestGuy\LICENSE.txt" />
     <None Include="Assets\_Results\result_1.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

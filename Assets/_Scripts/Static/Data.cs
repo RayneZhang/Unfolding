@@ -8,15 +8,15 @@ public class Data {
     public int[] Lines;
     public int[] Faces;
 
-    public Data(string DataPath)
+    public Data(string DataPath, int level)
     {
-        ImportData(DataPath);
+        ImportData(DataPath, level);
     }
 
-    private void ImportData(string _path)
+    private void ImportData(string _path, int _level)
     {
         string jsonString = File.ReadAllText(_path);
-        ParseJsonString(jsonString, "Level0");
+        ParseJsonString(jsonString, "Level" + _level);
     }
 
     private void ParseJsonString(string data, string level)
