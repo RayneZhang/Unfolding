@@ -73,10 +73,8 @@ public class TutorialBarControl : MonoBehaviour {
         }
         else if (CurrentPageNum == TotalPageNum)
         {
-            TutorialCanvas.SetActive(false);
-            UserCanvas.SetActive(true);
-            gameObj.SetActive(true);
-            meshgenerator.ReGenerate(3);
+            gameObj.SetActive(false);
+            StartCoroutine("WaitAndJump");
         }
         // Practice session.
         else
@@ -85,5 +83,14 @@ public class TutorialBarControl : MonoBehaviour {
         }
         
 
+    }
+
+    IEnumerator WaitAndJump()
+    {
+        yield return new WaitForSeconds(3.0f);
+        TutorialCanvas.SetActive(false);
+        UserCanvas.SetActive(true);
+        gameObj.SetActive(true);
+        meshgenerator.ReGenerate(3);
     }
 }

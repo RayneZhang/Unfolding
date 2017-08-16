@@ -88,6 +88,7 @@
     <Compile Include="Assets\_Scripts\MeshGenerator.cs" />
     <Compile Include="Assets\_Scripts\MiniJSON.cs" />
     <Compile Include="Assets\_Scripts\PlayerControl.cs" />
+    <Compile Include="Assets\_Scripts\ScoreManager.cs" />
     <Compile Include="Assets\_Scripts\Static\Container.cs" />
     <Compile Include="Assets\_Scripts\Static\Data.cs" />
     <Compile Include="Assets\_Scripts\Static\Glow.cs" />

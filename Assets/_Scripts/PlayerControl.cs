@@ -8,6 +8,8 @@ using System;
 public class PlayerControl : MonoBehaviour {
 
     public MeshGenerator meshGenerator;
+    public ScoreManager WinScoreManager;
+    public ScoreManager LoseScoreManager;
     public GameObject WinCanvas;
     public GameObject LoseCanvas;
     public GameObject UserCanvas;
@@ -204,18 +206,27 @@ public class PlayerControl : MonoBehaviour {
 
     public void Grading()
     {
-        bool result = CheckResult();
-        Debug.Log(result);
+        int grade = CheckResult();
+        Debug.Log("Your grade is: " + grade);
         UserCanvas.SetActive(false);
 
-        if (result)
+        if (grade == 1)
+        {
             WinCanvas.SetActive(true);
+            WinScoreManager.SetScore(grade);
+        }
         else
+        {
             LoseCanvas.SetActive(true);
+            LoseScoreManager.SetScore(grade);
+        }
     }
 
-    private bool CheckResult()
+    private int CheckResult()
     {
+        float TotalGrade = 0;
+        float CurrentGrade = 0;
+
         StreamReader reader = new StreamReader(path, false);
         char[] delimiterChars = { ';' };
 
@@ -227,17 +238,20 @@ public class PlayerControl : MonoBehaviour {
             string currentLine = reader.ReadLine();
 
             string[] results = currentLine.Split(delimiterChars, StringSplitOptions.RemoveEmptyEntries);
-            if (meshGenerator.model.faces[i].Neighbors.ToArray().Length != results.Length)
-                return false;
+            /*if (meshGenerator.model.faces[i].Neighbors.ToArray().Length != results.Length)
+                return false;*/
             foreach(string result in results)
             {
-                if (!meshGenerator.model.faces[i].Neighbors.Contains(int.Parse(result)))
-                    return false;
+                /*if (!meshGenerator.model.faces[i].Neighbors.Contains(int.Parse(result)))
+                    return false;*/
+                TotalGrade += 1;
+                if (meshGenerator.model.faces[i].Neighbors.Contains(int.Parse(result)))
+                    CurrentGrade += 1;
             }
             
         }
         reader.Close();
-        return true;
+        return (int)((CurrentGrade / TotalGrade) * 100);
     }
 
     public void ShowResult()
