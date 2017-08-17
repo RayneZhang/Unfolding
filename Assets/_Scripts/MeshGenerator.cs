@@ -20,6 +20,11 @@ public class MeshGenerator : MonoBehaviour {
     /// </summary>
     public Material LineMaterial;
 
+    /// <summary>
+    /// The Material of dashed line.
+    /// </summary>
+    public Material DashedLineMaterial;
+
     //Vertices
     List<Vector3> vertices;
     //Triangles
@@ -30,6 +35,10 @@ public class MeshGenerator : MonoBehaviour {
     List<Vector2> uvs;
 
     List<Line> AllLines;
+
+    List<Vector3> DashedLineMidpoints;
+    List<int> DashedLinesIndices;
+    List<LineRenderer> DashedLines;
 
     /// <summary>
     /// The quantitiy of vertex of LineRenderer.
@@ -52,6 +61,10 @@ public class MeshGenerator : MonoBehaviour {
     private List<Vector3> StartingNormals;
     private List<Vector3> UnfoldingNormals;
     private List<Vector3> PivotPoints;
+
+    private List<Vector3> StartingLines;
+    private List<Vector3> EndingLines;
+    private List<Vector3> LinePivotPoints;
 
     [HideInInspector]
     public int NumofFaces = 0;
@@ -95,6 +108,14 @@ public class MeshGenerator : MonoBehaviour {
         StartingNormals = new List<Vector3>();
         UnfoldingNormals = new List<Vector3>();
         PivotPoints = new List<Vector3>();
+
+        StartingLines = new List<Vector3>();
+        EndingLines = new List<Vector3>();
+        LinePivotPoints = new List<Vector3>();
+
+        DashedLineMidpoints = new List<Vector3>();
+        DashedLinesIndices = new List<int>();
+        DashedLines = new List<LineRenderer>();
     }
 
     void Update()
@@ -114,6 +135,11 @@ public class MeshGenerator : MonoBehaviour {
                 StartingNormals.Clear();
                 UnfoldingNormals.Clear();
                 PivotPoints.Clear();
+
+                LinePivotPoints.Clear();
+                StartingLines.Clear();
+                EndingLines.Clear();
+                DashedLines.Clear();
             }
             else
             {
@@ -147,6 +173,20 @@ public class MeshGenerator : MonoBehaviour {
 
                     ptr += VertexSize;
                 }
+
+                int lineptr = 0;
+                foreach(LineRenderer line in DashedLines)
+                {
+
+                    Vector3 tmpPosX = LinePivotPoints[lineptr] + Vector3.Slerp(StartingLines[lineptr] - LinePivotPoints[lineptr], EndingLines[lineptr] - LinePivotPoints[lineptr], Mathf.SmoothStep(0, 1, smoothPassedTime / smoothTime));
+                    lineptr++;
+                    Vector3 tmpPosY = LinePivotPoints[lineptr] + Vector3.Slerp(StartingLines[lineptr] - LinePivotPoints[lineptr], EndingLines[lineptr] - LinePivotPoints[lineptr], Mathf.SmoothStep(0, 1, smoothPassedTime / smoothTime));
+                    lineptr++;
+
+                    line.SetPosition(0, tmpPosX);
+                    line.SetPosition(1, tmpPosY);
+                }
+
                 mesh.vertices = vertices.ToArray();
                 mesh.normals = normals.ToArray();
             }
@@ -340,6 +380,7 @@ public class MeshGenerator : MonoBehaviour {
         meshCollider.sharedMesh = mesh;*/
         currentLineObj.AddComponent<Glow>();
         currentLineObj.GetComponent<Glow>().originalMaterial = LineMaterial;
+        currentLineObj.GetComponent<Glow>().DashedLineMaterial = DashedLineMaterial;
 
         BoxCollider boxCollider = currentLineObj.AddComponent<BoxCollider>();
         float lineLength = Vector3.Distance(_vertexA, _vertexB);
@@ -457,6 +498,40 @@ public class MeshGenerator : MonoBehaviour {
 
             model.faces[currentIndex].normals[0] = _TargetNormal;
             model.faces[currentIndex + NumofFaces].normals[0] = _TargetNormal;
+
+            // Calculate the dashed line position.
+            if (DashedLinesIndices.Contains(currentIndex))
+            {
+                int pos = DashedLinesIndices.IndexOf(currentIndex);
+                Vector3 DashedLineMidpoint = DashedLineMidpoints[pos];
+
+                foreach (GameObject line in GameObject.FindGameObjectsWithTag("Line"))
+                {
+                    Vector3 startingpt = line.GetComponent<LineRenderer>().GetPosition(0);
+                    Vector3 endingpt = line.GetComponent<LineRenderer>().GetPosition(1);
+                    if (DashedLineMidpoint == (startingpt + endingpt) / 2)
+                    {
+                        DashedLines.Add(line.GetComponent<LineRenderer>());
+                        StartingLines.Add(startingpt);
+                        StartingLines.Add(endingpt);
+
+                        Vector3 PivotPointA = GetPivotPoint(startingPoint, endingPoint, startingpt);
+                        Vector3 newPositionA = rotation * (startingpt - PivotPointA) + PivotPointA;
+
+                        Vector3 PivotPointB = GetPivotPoint(startingPoint, endingPoint, endingpt);
+                        Vector3 newPositionB = rotation * (endingpt - PivotPointB) + PivotPointB;
+
+                        LinePivotPoints.Add(PivotPointA);
+                        LinePivotPoints.Add(PivotPointB);
+
+                        EndingLines.Add(newPositionA);
+                        EndingLines.Add(newPositionB);
+
+                        DashedLineMidpoints[pos] = (newPositionA + newPositionB) / 2;
+                    }
+
+                }
+            }
         }
 
     }
@@ -491,5 +566,15 @@ public class MeshGenerator : MonoBehaviour {
         mesh.triangles = triangles.ToArray();
 
         CreateLines();
+    }
+
+    public void AddDashedLineMidpoints(Vector3 _Midpoint)
+    {
+        DashedLineMidpoints.Add(_Midpoint);
+    }
+
+    public void AddDashedLineIndex(int index)
+    {
+        DashedLinesIndices.Add(index);
     }
 }

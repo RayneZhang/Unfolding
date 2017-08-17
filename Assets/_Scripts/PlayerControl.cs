@@ -52,6 +52,10 @@ public class PlayerControl : MonoBehaviour {
                 //Destroy the Line.
                 hitObject.transform.GetComponent<Glow>().destroyLine();
 
+                //Instead of destroying the line, we change its color to grey.
+                //hitObject.transform.GetComponent<BoxCollider>().enabled = false;
+                //hitObject.transform.GetComponent<Glow>().ChangeToGray();
+
                 Vector3 midPoint = (startingPoint + endingPoint) / 2;
                 //Debug.Log(midPoint);
 
@@ -81,6 +85,8 @@ public class PlayerControl : MonoBehaviour {
             Vector3 rmMidPoint = meshGenerator.model.faces[indexA].linesMidpoints[0];
 
             DeleteLastLine(rmMidPoint);
+            meshGenerator.AddDashedLineIndex(indexA);
+
             if (GameObject.FindGameObjectWithTag("Line") == null)
             {
                 WaitingLines.Clear();
@@ -119,6 +125,8 @@ public class PlayerControl : MonoBehaviour {
             Vector3 rmMidPoint = meshGenerator.model.faces[indexB].linesMidpoints[0];
 
             DeleteLastLine(rmMidPoint);
+            meshGenerator.AddDashedLineIndex(indexB);
+
             if (GameObject.FindGameObjectWithTag("Line") == null)
             {
                 WaitingLines.Clear();
@@ -194,7 +202,14 @@ public class PlayerControl : MonoBehaviour {
             Vector3 startingPoint = line.GetComponent<LineRenderer>().GetPosition(0);
             Vector3 endingPoint = line.GetComponent<LineRenderer>().GetPosition(1);
             if (midPoint == (startingPoint + endingPoint) / 2)
-                Destroy(line);
+            {
+                //Destroy(line);
+                line.GetComponent<BoxCollider>().enabled = false;
+                line.GetComponent<Glow>().ChangeToDashedLine();
+
+                meshGenerator.AddDashedLineMidpoints(midPoint);
+            }
+                
         }
 
         //You need to consider a series of unfolding, which means when you delete the last line, a new unfolding happens.

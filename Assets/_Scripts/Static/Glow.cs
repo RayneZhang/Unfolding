@@ -5,7 +5,8 @@ using UnityEngine;
 public class Glow : MonoBehaviour
 {
     public Material originalMaterial;
-
+    public Material DashedLineMaterial;
+    bool clicked = false;
     void OnMouseEnter()
     {
         transform.GetComponent<Renderer>().material.color = new Color(1f, 1f, 0f);
@@ -13,7 +14,8 @@ public class Glow : MonoBehaviour
 
     void OnMouseExit()
     {
-        transform.GetComponent<Renderer>().material = originalMaterial;
+        if(!clicked)
+            transform.GetComponent<Renderer>().material = originalMaterial;
     }
 
     /// <summary>
@@ -28,5 +30,17 @@ public class Glow : MonoBehaviour
     public void destroyLine()
     {
         DestroyObject(gameObject);
+    }
+
+    public void ChangeToGray()
+    {
+        transform.GetComponent<Renderer>().material.color = Color.gray;
+        clicked = true;
+    }
+
+    public void ChangeToDashedLine()
+    {
+        transform.GetComponent<Renderer>().material = DashedLineMaterial;
+        clicked = true;
     }
 }
