@@ -122,11 +122,22 @@ public class MeshGenerator : MonoBehaviour {
     {
         if (player.unfolding)
         {
-            
             //Debug.Log("Amoving!");
             smoothPassedTime = Mathf.Min(smoothPassedTime + Time.deltaTime, smoothTime);
             if(smoothPassedTime >= smoothTime)
             {
+                int lineptr = 0;
+                foreach (LineRenderer line in DashedLines)
+                {
+                    Vector3 tmpPosX = EndingLines[lineptr];
+                    lineptr++;
+                    Vector3 tmpPosY = EndingLines[lineptr];
+                    lineptr++;
+
+                    line.SetPosition(0, tmpPosX);
+                    line.SetPosition(1, tmpPosY);
+                }
+
                 player.unfolding = false;
                 smoothPassedTime = 0f;
                 UnfoldingFaces.Clear();
@@ -175,9 +186,9 @@ public class MeshGenerator : MonoBehaviour {
                 }
 
                 int lineptr = 0;
-                foreach(LineRenderer line in DashedLines)
+                Debug.Log("DashedLines size: " + DashedLines.ToArray().Length);
+                foreach (LineRenderer line in DashedLines)
                 {
-
                     Vector3 tmpPosX = LinePivotPoints[lineptr] + Vector3.Slerp(StartingLines[lineptr] - LinePivotPoints[lineptr], EndingLines[lineptr] - LinePivotPoints[lineptr], Mathf.SmoothStep(0, 1, smoothPassedTime / smoothTime));
                     lineptr++;
                     Vector3 tmpPosY = LinePivotPoints[lineptr] + Vector3.Slerp(StartingLines[lineptr] - LinePivotPoints[lineptr], EndingLines[lineptr] - LinePivotPoints[lineptr], Mathf.SmoothStep(0, 1, smoothPassedTime / smoothTime));
@@ -509,9 +520,17 @@ public class MeshGenerator : MonoBehaviour {
                 {
                     Vector3 startingpt = line.GetComponent<LineRenderer>().GetPosition(0);
                     Vector3 endingpt = line.GetComponent<LineRenderer>().GetPosition(1);
+                    
+
                     if (DashedLineMidpoint == (startingpt + endingpt) / 2)
                     {
+                        /*Debug.Log("The truth is " + (startingpt + endingpt) / 2);
+                        Debug.Log("We want " + DashedLineMidpoint);
+                        Debug.Log("Current Index is " + currentIndex);*/
+
                         DashedLines.Add(line.GetComponent<LineRenderer>());
+                        //Debug.Log("Now Dashed line is " + DashedLines.ToArray().Length);
+
                         StartingLines.Add(startingpt);
                         StartingLines.Add(endingpt);
 
